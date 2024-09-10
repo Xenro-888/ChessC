@@ -18,6 +18,25 @@ piece* create_piece(piece_type type, piece_color color, int file, int rank)
 	return NULL;
 }
 
+int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment, int rank_increment, int path_length)
+{
+	int check_space_file = piece_to_move->file + file_increment;
+	int check_space_rank = piece_to_move->rank + rank_increment;
+	piece* check_space = board[check_space_rank][check_space_file];
+
+	for (int i = 0; i < path_length; i++)
+	{
+		if (check_space != NULL && check_space->color == piece_to_move->color)
+			return true;
+
+		check_space_file += file_increment;
+		check_space_rank += rank_increment;
+		check_space = board[check_space_rank][check_space_file];
+	}
+
+	return false;
+}
+
 int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 {
 	if (piece_to_move == NULL || !is_position_in_board(file, rank))
@@ -48,6 +67,32 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			}
 			else
 				return false;
+		}
+	}
+	else if (piece_to_move->type == BISHOP)
+	{
+		// abs(r) 
+		if (
+			(file_difference == 0 || rank_difference == 0) ||
+			abs_file_difference/abs_rank_difference != 1
+			)
+			return false;
+
+		int check_space_file = piece_to_move->file;
+		int check_space_rank = piece_to_move->rank;
+		piece* check_space = board[check_space_rank][check_space_file];
+
+		if (
+			is_path_blocked(
+				board,
+				piece_to_move,
+				file_difference > 0 ? 1 : -1,
+				rank_difference > 0 ? 1 : -1,
+				max(abs_file_difference, abs_rank_difference)
+			)
+			)
+		{
+			return false;
 		}
 	}
 

@@ -42,7 +42,7 @@ void start_game(piece* board[8][8])
 			{
 				piece* selected_piece = board[start_pos_rank][start_pos_file];
 
-				if (selected_piece != NULL || selected_piece->color == current_turn)
+				if (selected_piece != NULL)
 				{
 					valid_move = move_piece(selected_piece, move_pos_file, move_pos_rank, board);
 

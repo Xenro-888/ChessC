@@ -15,6 +15,7 @@ typedef struct
 } piece;
 
 piece* create_piece(piece_type type, piece_color color, int file, int rank);
+int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment, int rank_increment, int path_length);
 int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8]);
 int is_position_in_board(int file, int rank);
 
