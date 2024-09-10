@@ -20,134 +20,43 @@ piece* create_piece(piece_type type, piece_color color, int file, int rank)
 
 int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 {
-	int can_move = false;
+	if (piece_to_move == NULL || !is_position_in_board(file, rank))
+		return false;
+	
+	piece* space_to_move = board[rank][file];
+	int file_difference = file - piece_to_move->file;
+	int rank_difference = rank - piece_to_move->rank;
+	int abs_file_difference = abs(file_difference);
+	int abs_rank_difference = abs(rank_difference);
 
-	// if the piece exists and the move position is in the board
-	if (piece_to_move != NULL && is_position_in_board(file, rank))
+	if (piece_to_move->type == PAWN)
 	{
-		if (piece_to_move->type == PAWN)
+		if (
+			(rank_difference < 1 || rank_difference > 2) ||
+			(abs_file_difference > 0 && space_to_move == NULL) ||
+			(abs_file_difference > 1) ||
+			(rank_difference > 1 && (abs_file_difference > 0 || piece_to_move->rank != 1))
+			)
+			return false;
+
+		if (space_to_move != NULL)
 		{
-			int piece_direction = piece_to_move->color == WHITE ? 1 : -1; // if the pawn's color is white, 1 is the forward direction. if it's not white, -1 if the forward direction.
-			int pawn_moves[][2] = {
-				{piece_to_move->file, piece_to_move->rank + piece_direction},
-				{piece_to_move->file - 1, piece_to_move->rank + piece_direction},
-				{piece_to_move->file + 1, piece_to_move->rank + piece_direction},
-				{piece_to_move->file, piece_to_move->rank + piece_direction * 2} // double move
-			};
-
-			// check if one of the attempted moves and possible moves match up
-			for (int i = 0; i < 4; i++)
+			if (space_to_move->color != piece_to_move->color)
 			{
-				int* possible_move = pawn_moves[i];
-
-				// if the attempted move matches a possible move
-				if (possible_move[0] == file && possible_move[1] == rank)
-				{
-					piece* next_square_piece = board[rank][file];
-
-					// if attempting double move
-					if (i == 3)
-					{
-						if (
-							piece_to_move->rank == 1 || 
-							piece_to_move->rank == 6 &&
-							next_square_piece == NULL
-							)
-						{
-							can_move = true;
-						}
-					}
-					// if attempting capture
-					else if (i == 1 || i == 2)
-					{
-						if (next_square_piece != NULL && next_square_piece->color != piece_to_move->color)
-						{
-							free(next_square_piece);
-							can_move = true;
-						}
-					}
-					// if attempting normal move
-					else if (i == 0)
-					{
-						if (next_square_piece == NULL)
-						{
-							can_move = true;
-						}
-					}
-
-					printf("%d\n", can_move);
-				}
+				free(space_to_move);
+				space_to_move = NULL;
 			}
-		}
-		else if (piece_to_move->type == BISHOP)
-		{
-			int move_slope = (piece_to_move->file - file) / (piece_to_move->rank - rank);
-			piece* next_square_piece = board[rank][file];
-
-			if (move_slope == 1 || move_slope == -1)
-			{
-				// if move is a capture
-				if (next_square_piece != NULL && next_square_piece->color != piece_to_move->color)
-				{
-					free(next_square_piece);
-					can_move = true;
-				}
-				// if move is a normal move
-				else if (next_square_piece == NULL)
-				{
-					can_move = true;
-				}
-			}
-		}
-		else if (piece_to_move->type == KNIGHT)
-		{
-			int file_change = abs(piece_to_move->file - file);
-			int rank_change = abs(piece_to_move->rank - rank);
-			piece* next_square_piece = board[rank][file];
-
-			// if move is in moveset
-			if (
-				(file_change == 2 && rank_change == 1) ||
-				(file_change == 1 && rank_change == 2)
-				)
-			{
-				// if move is a capture
-				if (next_square_piece != NULL && next_square_piece->color != piece_to_move->color)
-				{
-					free(next_square_piece);
-					can_move = true;
-				}
-				else if (next_square_piece == NULL)
-				{
-					can_move = true;
-				}
-			}
-		}
-		else if (piece_to_move->type == ROOK)
-		{
-			int file_change = abs(piece_to_move->file - file);
-			int rank_change = abs(piece_to_move->rank - rank);
-
-			if (
-				(file_change > 0 && rank_change == 0) ||
-				(rank_change > 0 && file_change == 0)
-				)
-			{
-				
-			}
+			else
+				return false;
 		}
 	}
 
-	if (can_move)
-	{
-		board[piece_to_move->rank][piece_to_move->file] = NULL;
-		piece_to_move->file = file;
-		piece_to_move->rank = rank;
-		board[rank][file] = piece_to_move;
-		return true;
-	}
+	board[piece_to_move->rank][piece_to_move->file] = NULL;
+	board[rank][file] = piece_to_move;
+	piece_to_move->file = file;
+	piece_to_move->rank = rank;
 
-	return false;
+	return true;
 }
 
 int is_position_in_board(int file, int rank)
