@@ -2,6 +2,16 @@
 #include "stdlib.h"
 #include "piece.h"
 
+int get_sign(int number)
+{
+	if (number > 0)
+		return 1;
+	else if (number == 0)
+		return number;
+	else
+		return -1;
+}
+
 piece* create_piece(piece_type type, piece_color color, int file, int rank)
 {
 	if (is_position_in_board(file, rank))
@@ -22,6 +32,9 @@ int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment
 {
 	int check_space_file = piece_to_move->file + file_increment;
 	int check_space_rank = piece_to_move->rank + rank_increment;
+
+	printf("%d, %d\n", check_space_file, check_space_rank);
+
 	piece* check_space = board[check_space_rank][check_space_file];
 
 	for (int i = 0; i < path_length; i++)
@@ -71,7 +84,6 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 	}
 	else if (piece_to_move->type == BISHOP)
 	{
-		// abs(r) 
 		if (
 			(file_difference == 0 || rank_difference == 0) ||
 			abs_file_difference/abs_rank_difference != 1
@@ -94,6 +106,55 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 		{
 			return false;
 		}
+	}
+	else if (piece_to_move->type == KNIGHT)
+	{
+		if (
+			(abs_file_difference < 1 || abs_file_difference > 2) ||
+			(abs_rank_difference < 1 || abs_rank_difference > 2) ||
+			(abs_file_difference == abs_rank_difference)
+			)
+		{
+			return false;
+		}
+
+		if (space_to_move != NULL)
+		{
+			if (space_to_move->color != piece_to_move->color)
+			{
+				free(space_to_move);
+				space_to_move = NULL;
+			}
+			else
+				return false;
+		}
+	}
+	else if (piece_to_move->type == ROOK)
+	{
+		if (
+			(abs_file_difference > abs_rank_difference && abs_rank_difference) != 0 ||
+			(abs_rank_difference > abs_file_difference && abs_file_difference) != 0
+			)
+		{
+			return false;
+		}
+
+		if (
+			is_path_blocked(
+				board,
+				piece_to_move,
+				get_sign(file_difference),
+				get_sign(rank_difference),
+				max(abs_file_difference, abs_rank_difference)
+			)
+			)
+		{
+			return false;
+		}
+	}
+	else if (piece_to_move->type == QUEEN)
+	{
+		
 	}
 
 	board[piece_to_move->rank][piece_to_move->file] = NULL;
@@ -184,7 +245,7 @@ void clear_board(piece* board[8][8])
 
 void display_board(piece* board[8][8])
 {
-	printf("\x1b[H\x1b[2J");
+	//printf("\x1b[H\x1b[2J");
 	printf("---/TROY'S CHESS GAME/---\n\n");
 	for (int i = 7; i >= 0; i--)
 	{
