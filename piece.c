@@ -33,8 +33,6 @@ int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment
 	int check_space_file = piece_to_move->file + file_increment;
 	int check_space_rank = piece_to_move->rank + rank_increment;
 
-	printf("%d, %d\n", check_space_file, check_space_rank);
-
 	piece* check_space = board[check_space_rank][check_space_file];
 
 	for (int i = 0; i < path_length; i++)
@@ -132,8 +130,8 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 	else if (piece_to_move->type == ROOK)
 	{
 		if (
-			(abs_file_difference > abs_rank_difference && abs_rank_difference) != 0 ||
-			(abs_rank_difference > abs_file_difference && abs_file_difference) != 0
+			(abs_file_difference > 0 && abs_rank_difference) != 0 ||
+			(abs_rank_difference > 0 && abs_file_difference) != 0
 			)
 		{
 			return false;
@@ -245,7 +243,7 @@ void clear_board(piece* board[8][8])
 
 void display_board(piece* board[8][8])
 {
-	//printf("\x1b[H\x1b[2J");
+	printf("\x1b[H\x1b[2J");
 	printf("---/TROY'S CHESS GAME/---\n\n");
 	for (int i = 7; i >= 0; i--)
 	{
