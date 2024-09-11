@@ -68,17 +68,6 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			(rank_difference > 1 && (abs_file_difference > 0 || piece_to_move->rank != 1))
 			)
 			return false;
-
-		if (space_to_move != NULL)
-		{
-			if (space_to_move->color != piece_to_move->color)
-			{
-				free(space_to_move);
-				space_to_move = NULL;
-			}
-			else
-				return false;
-		}
 	}
 	else if (piece_to_move->type == BISHOP)
 	{
@@ -98,8 +87,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 				piece_to_move,
 				file_difference > 0 ? 1 : -1,
 				rank_difference > 0 ? 1 : -1,
-				max(abs_file_difference, abs_rank_difference)
-			)
+				max(abs_file_difference, abs_rank_difference))
 			)
 		{
 			return false;
@@ -113,7 +101,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			(abs_file_difference == abs_rank_difference)
 			)
 		{
-			return false;
+			return false;  
 		}
 
 		if (space_to_move != NULL)
@@ -143,8 +131,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 				piece_to_move,
 				get_sign(file_difference),
 				get_sign(rank_difference),
-				max(abs_file_difference, abs_rank_difference)
-			)
+				max(abs_file_difference, abs_rank_difference))
 			)
 		{
 			return false;
@@ -152,7 +139,41 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 	}
 	else if (piece_to_move->type == QUEEN)
 	{
-		
+		if (
+			abs_rank_difference > 0 && abs_file_difference != 0 &&
+			abs_rank_difference != 0 && (abs(file_difference/rank_difference) > 0 && abs(file_difference / rank_difference) < 1 || abs(file_difference / rank_difference) > 1)
+			)
+		{
+			return false;
+		}
+
+		if (
+			is_path_blocked(
+				board,
+				piece_to_move,
+				get_sign(file_difference),
+				get_sign(rank_difference),
+				max(abs_file_difference, abs_rank_difference))
+			)
+		{
+			return false;
+		}
+	}
+	else if (piece_to_move->type == KING)
+	{
+		if (abs_rank_difference > 1 || abs_file_difference > 1)
+			return false;
+	}
+
+	if (space_to_move != NULL)
+	{
+		if (space_to_move->color != piece_to_move->color)
+		{
+			free(space_to_move);
+			space_to_move == NULL;
+		}
+		else
+			return false;
 	}
 
 	board[piece_to_move->rank][piece_to_move->file] = NULL;
