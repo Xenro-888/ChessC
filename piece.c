@@ -65,7 +65,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			(rank_difference < 1 || rank_difference > 2) ||
 			(abs_file_difference > 0 && space_to_move == NULL) ||
 			(abs_file_difference > 1) ||
-			(rank_difference > 1 && (abs_file_difference > 0 || piece_to_move->rank != 1))
+			(rank_difference > 1 && (abs_file_difference > 0 || (piece_to_move->rank != 1 || piece_to_move->rank != 6)))
 			)
 			return false;
 	}

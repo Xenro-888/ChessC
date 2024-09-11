@@ -3,8 +3,6 @@
 #include "piece.h"
 #include "game.h"
 
-
-
 int main()
 {
 	piece* board[8][8];
