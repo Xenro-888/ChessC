@@ -48,11 +48,11 @@ int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment
 	return false;
 }
 
-int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
+int is_move_valid(piece* piece_to_move, int file, int rank, piece* board[8][8])
 {
 	if (piece_to_move == NULL || !is_position_in_board(file, rank))
 		return false;
-	
+
 	piece* space_to_move = board[rank][file];
 	int file_difference = file - piece_to_move->file;
 	int rank_difference = rank - piece_to_move->rank;
@@ -65,7 +65,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			(rank_difference < 1 || rank_difference > 2) ||
 			(abs_file_difference > 0 && space_to_move == NULL) ||
 			(abs_file_difference > 1) ||
-			(rank_difference > 1 && (abs_file_difference > 0 || (piece_to_move->rank != 1 || piece_to_move->rank != 6)))
+			(rank_difference > 1 && (abs_file_difference > 0 || (piece_to_move->rank != 1 && piece_to_move->rank != 6)))
 			)
 			return false;
 	}
@@ -73,7 +73,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 	{
 		if (
 			(file_difference == 0 || rank_difference == 0) ||
-			abs_file_difference/abs_rank_difference != 1
+			abs_file_difference / abs_rank_difference != 1
 			)
 			return false;
 
@@ -101,14 +101,13 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			(abs_file_difference == abs_rank_difference)
 			)
 		{
-			return false;  
+			return false;
 		}
 
 		if (space_to_move != NULL)
 		{
 			if (space_to_move->color != piece_to_move->color)
 			{
-				free(space_to_move);
 				space_to_move = NULL;
 			}
 			else
@@ -141,7 +140,7 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 	{
 		if (
 			abs_rank_difference > 0 && abs_file_difference != 0 &&
-			abs_rank_difference != 0 && (abs(file_difference/rank_difference) > 0 && abs(file_difference / rank_difference) < 1 || abs(file_difference / rank_difference) > 1)
+			abs_rank_difference != 0 && (abs(file_difference / rank_difference) > 0 && abs(file_difference / rank_difference) < 1 || abs(file_difference / rank_difference) > 1)
 			)
 		{
 			return false;
@@ -165,21 +164,21 @@ int move_piece(piece* piece_to_move, int file, int rank, piece* board[8][8])
 			return false;
 	}
 
-	if (space_to_move != NULL)
-	{
-		if (space_to_move->color != piece_to_move->color)
-		{
-			free(space_to_move);
-			space_to_move == NULL;
-		}
-		else
-			return false;
-	}
+	if (space_to_move != NULL && space_to_move->color == piece_to_move->color)
+		return false;
+}
+
+int set_piece_pos(piece* piece_to_move, int file, int rank, piece* board[8][8])
+{
+	printf("%d, %d\n", file, rank);
+	if (board[rank][file] != NULL)
+		free(board[rank][file]);
 
 	board[piece_to_move->rank][piece_to_move->file] = NULL;
 	board[rank][file] = piece_to_move;
 	piece_to_move->file = file;
 	piece_to_move->rank = rank;
+	printf("%d\n", board[rank][file]->type);
 
 	return true;
 }
@@ -197,46 +196,51 @@ int is_position_in_board(int file, int rank)
 	return false;
 }
 
-void init_board(piece* board[8][8])
+void init_board(piece* board[8][8], piece* white_pieces[16], piece* black_pieces[16])
 {
+	int white_piece_index = 0;
+	int black_piece_index = 0;
+
 	for (int rank = 0; rank < 8; rank++)
 	{
 		for (int file = 0; file < 8; file++)
 		{
 			piece_color possible_piece_color = rank <= 1 ? WHITE : BLACK; // if the rank is 1 or less, the possible color is WHITE. if not, it's black.
+			piece* new_piece = create_piece(PAWN, possible_piece_color, file, rank);
 
 			// only create pieces if the rank is the edges of the board
 			if (rank <= 1 || rank >= 6)
 			{
 				// create pawns
 				if (rank == 1 || rank == 6)
-				{
-					board[rank][file] = create_piece(PAWN, possible_piece_color, file, rank);
-				}
+					new_piece->type = PAWN;
 				// create rooks
 				else if (file == 0 || file == 7)
-				{
-					board[rank][file] = create_piece(ROOK, possible_piece_color, file, rank);
-				}
+					new_piece->type = ROOK;
 				// create knights
 				else if (file == 1 || file == 6)
-				{
-					board[rank][file] = create_piece(KNIGHT, possible_piece_color, file, rank);
-				}
+					new_piece->type = KNIGHT;
 				// create bishops
 				else if (file == 2 || file == 5)
-				{
-					board[rank][file] = create_piece(BISHOP, possible_piece_color, file, rank);
-				}
+					new_piece->type = BISHOP;
 				// create queens
 				else if (file == 3)
-				{
-					board[rank][file] = create_piece(QUEEN, possible_piece_color, file, rank);
-				}
+					new_piece->type = QUEEN;
 				// create kings
 				else if (file == 4)
+					new_piece->type = KING;
+
+				board[rank][file] = new_piece;
+
+				if (new_piece->color == WHITE)
 				{
-					board[rank][file] = create_piece(KING, possible_piece_color, file, rank);
+					white_pieces[white_piece_index] = new_piece;
+					white_piece_index++;
+				}
+				else
+				{
+					black_pieces[black_piece_index] = new_piece;
+					black_piece_index++;
 				}
 			}
 			// if the rank isn't the edge, make a empty space
@@ -246,6 +250,45 @@ void init_board(piece* board[8][8])
 			}
 		}
 	}
+}
+
+int is_in_check(piece_color color, piece* white_pieces[16], piece* black_pieces[16], piece* board[8][8])
+{
+	const piece* king = NULL;
+	piece* ally_pieces[16];
+	piece* enemy_pieces[16];
+
+	for (int i = 0; i < 16; i++)
+	{
+		if (color == WHITE)
+		{
+			ally_pieces[i] = white_pieces[i];
+			enemy_pieces[i] = black_pieces;
+		}
+		else
+		{
+			ally_pieces[i] = black_pieces[i];
+			enemy_pieces[i] = white_pieces;
+		}
+	}
+
+	for (int i = 0; i < 16; i++)
+	{
+		if (ally_pieces[i]->type == KING)
+		{
+			king = ally_pieces[i];
+			break;
+		}
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		piece* current_piece = enemy_pieces[i];
+		if (is_move_valid(current_piece, king->file, king->rank, board))
+			return true;
+	}
+
+	return false;
 }
 
 void clear_board(piece* board[8][8])
@@ -264,7 +307,7 @@ void clear_board(piece* board[8][8])
 
 void display_board(piece* board[8][8])
 {
-	printf("\x1b[H\x1b[2J");
+	//printf("\x1b[H\x1b[2J");
 	printf("---/TROY'S CHESS GAME/---\n\n");
 	for (int i = 7; i >= 0; i--)
 	{

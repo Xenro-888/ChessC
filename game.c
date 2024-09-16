@@ -4,7 +4,7 @@
 #include "piece.h"
 
 int get_file_index(char file)
-{
+{    
 	return (int)file - 97;
 }
 
@@ -15,55 +15,60 @@ int get_rank_index(char rank)
 
 void start_game(piece* board[8][8])
 {
-	char move_input[12];
-	int game_over = 0;
+	piece* white_pieces[16];
+	piece* black_pieces[16];
+
+	int game_over = false;
 	int valid_move = false;
+
+	piece* chosen_piece = NULL;
 	piece_color current_turn = WHITE;
 
+	init_board(board, white_pieces, black_pieces);
+
+	is_in_check(current_turn, white_pieces, black_pieces, board);
 	while (!game_over)
 	{
-		display_board(board);
+		char selected_piece_input[12];
+		char move_input[12];
+		int move_file = 0;
+		int move_rank = 0;
 
+		display_board(board);
 		printf("\n\x1b[37;22mENTER A MOVE (RF RF):\n");
 
 		while (!valid_move)
 		{
-			fgets(move_input, sizeof(move_input), stdin);
-
-			int start_pos_file = get_file_index(move_input[0]);
-			int start_pos_rank = get_rank_index(move_input[1]);
-			int move_pos_file = get_file_index(move_input[3]);
-			int move_pos_rank = get_rank_index(move_input[4]);
-
-			if (
-				is_position_in_board(start_pos_file, start_pos_rank) &&
-				is_position_in_board(move_pos_file, move_pos_rank)
-				)
+			while (chosen_piece == NULL)
 			{
-				piece* selected_piece = board[start_pos_rank][start_pos_file];
+				fgets(selected_piece_input, sizeof(selected_piece_input), stdin);
+				int chosen_piece_file = get_file_index(selected_piece_input[0]);
+				int chosen_piece_rank = get_rank_index(selected_piece_input[1]);
 
-				if (selected_piece != NULL)
-				{
-					valid_move = move_piece(selected_piece, move_pos_file, move_pos_rank, board);
-
-					if (!valid_move)
-					{
-						printf("INVALID MOVE.\n");
-					}
-				}
+				if (is_position_in_board(chosen_piece_file, chosen_piece_rank))
+					chosen_piece = board[chosen_piece_rank][chosen_piece_file];
 				else
-				{
-					printf("PIECE DOESNT EXISTS OR IS WRONG COLOR.\n");
-				}
+					printf("INVALID PIECE COORDINATES\n");
+
+				memset(selected_piece_input, 0, sizeof(selected_piece_input));
 			}
+
+			fgets(move_input, sizeof(move_input), stdin);
+			int move_file = get_file_index(move_input[0]);
+			int move_rank = get_rank_index(move_input[1]);
+
+			if (is_position_in_board(move_file, move_rank))
+				valid_move = is_move_valid(chosen_piece, move_file, move_rank, board);
 			else
-			{
-				printf("COORDINATES OUT OF RANGE. %d, %d to %d, %d\n", start_pos_file, start_pos_rank, move_pos_file, move_pos_rank);
-			}
+				printf("INVALID MOVE COORDINATED\n");
+
+			memset(move_input, 0, sizeof(move_input));
+			printf("%d, %d\n", move_file, move_rank);
 		}
+		printf("MOVING PIECE\n");
+		set_piece_pos(chosen_piece, move_file, move_rank, board);
 
 		valid_move = false;
-		memset(move_input, 0, sizeof(move_input));
 		current_turn = current_turn == WHITE ? BLACK : WHITE; // if the current turn is white, set it to black. if not, set it to white.
 	}
 }
