@@ -2,6 +2,7 @@
 #include <string.h>
 #include "game.h"
 #include "piece.h"
+#include "board.h"
 
 int get_file_index(char file)
 {    
@@ -26,7 +27,6 @@ void start_game(piece* board[8][8])
 
 	init_board(board, white_pieces, black_pieces);
 
-	is_in_check(current_turn, white_pieces, black_pieces, board);
 	while (!game_over)
 	{
 		char selected_piece_input[12];
@@ -54,19 +54,21 @@ void start_game(piece* board[8][8])
 			}
 
 			fgets(move_input, sizeof(move_input), stdin);
-			int move_file = get_file_index(move_input[0]);
-			int move_rank = get_rank_index(move_input[1]);
+			move_file = get_file_index(move_input[0]);
+			move_rank = get_rank_index(move_input[1]);
 
 			if (is_position_in_board(move_file, move_rank))
-				valid_move = is_move_valid(chosen_piece, move_file, move_rank, board);
+				valid_move = is_move_valid_basic(chosen_piece, move_file, move_rank, board);
 			else
-				printf("INVALID MOVE COORDINATED\n");
+				printf("INVALID MOVE COORDINATES\n");
 
 			memset(move_input, 0, sizeof(move_input));
-			printf("%d, %d\n", move_file, move_rank);
 		}
-		printf("MOVING PIECE\n");
-		set_piece_pos(chosen_piece, move_file, move_rank, board);
+
+		if (process_move(chosen_piece, move_file, move_rank, white_pieces, black_pieces, board))
+			set_piece_pos(chosen_piece, move_file, move_rank, board);
+		else
+			printf("INVALID MOVE!\n");
 
 		valid_move = false;
 		current_turn = current_turn == WHITE ? BLACK : WHITE; // if the current turn is white, set it to black. if not, set it to white.
