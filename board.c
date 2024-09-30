@@ -14,6 +14,9 @@ int get_sign(int number)
 
 int set_piece_pos(piece* piece_to_move, int file, int rank, piece* board[8][8])
 {
+	if (board[rank][file] != NULL)
+		free(board[rank][file]);
+
 	board[piece_to_move->rank][piece_to_move->file] = NULL;
 	board[rank][file] = piece_to_move;
 	piece_to_move->file = file;
@@ -91,7 +94,8 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 			(rank_difference < 1 || rank_difference > 2) ||
 			(abs_file_difference > 0 && space_to_move == NULL) ||
 			(abs_file_difference > 1) ||
-			(rank_difference > 1 && (abs_file_difference > 0 || (piece_to_move->rank != 1 && piece_to_move->rank != 6)))
+			(rank_difference > 1 && (abs_file_difference > 0 || (piece_to_move->rank != 1 && piece_to_move->rank != 6))) ||
+			(space_to_move != NULL && abs_file_difference == 0)
 			)
 		{
 			return false;
@@ -103,7 +107,9 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 			(file_difference == 0 || rank_difference == 0) ||
 			abs_file_difference / abs_rank_difference != 1
 			)
+		{
 			return false;
+		}
 
 		int check_space_file = piece_to_move->file;
 		int check_space_rank = piece_to_move->rank;
@@ -196,16 +202,19 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 
 int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces, piece* black_pieces, piece* board[8][8])
 {
-	int previous_file = piece_to_move->file;
-	int previous_rank = piece_to_move->rank;
+	piece* covered_piece = board[rank][file];
 
 	if (!is_move_valid_basic(piece_to_move, file, rank, board))
 		return false;
 
 	board[rank][file] = piece_to_move;
-	board[piece_to_move->file][piece_to_move->rank] = NULL;
+	board[piece_to_move->rank][piece_to_move->file] = NULL;
+
 	if (is_in_check(piece_to_move->color, white_pieces, black_pieces, board))
 		return false;
+
+	board[piece_to_move->rank][piece_to_move->file] = piece_to_move;
+	board[rank][file] = covered_piece;
 
 	return true;
 }

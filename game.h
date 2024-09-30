@@ -1,3 +1,3 @@
 #include "piece.h"
 
-void start_game(piece* board[8][8]);
+void start_game();

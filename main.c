@@ -6,9 +6,7 @@
 
 int main()
 {
-	piece* board[8][8];
-
-	start_game(board);
+	start_game();
 	onexit(clear_board);
 	
 	return 0;
