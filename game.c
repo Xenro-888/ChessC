@@ -18,7 +18,7 @@ void start_game()
 
 	while (!game_over)
 	{
-		display_board(board);
+		display_board(board, NULL, white_pieces, black_pieces);
 		printf("\n\x1b[37;22m\n");
 
 		char player_input[12];
@@ -30,13 +30,13 @@ void start_game()
 			fgets(player_input, sizeof(player_input), stdin);
 			int piece_file = get_file_index(player_input[0]);
 			int piece_rank = get_rank_index(player_input[1]);
-
 			if (!is_position_in_board(piece_file, piece_rank))
 				continue;
 
 			piece_to_move = board[piece_rank][piece_file];
 			memset(player_input, 0, sizeof(player_input));
 		}
+		display_board(board, piece_to_move, white_pieces, black_pieces);
 
 		int valid_move = false;
 		int move_file = 0;

@@ -18,4 +18,3 @@ piece* create_piece(piece_type type, piece_color color, int file, int rank);
 int is_position_in_board(int file, int rank);
 void init_board(piece* board[8][8], piece* white_pieces[16], piece* black_pieces[16]);
 void clear_board(piece* board[8][8]);
-void display_board(piece* board[8][8]);

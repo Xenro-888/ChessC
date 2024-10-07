@@ -200,7 +200,7 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 		return false;
 }
 
-int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces, piece* black_pieces, piece* board[8][8])
+int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces[16], piece* black_pieces[16], piece* board[8][8])
 {
 	piece* covered_piece = board[rank][file];
 
@@ -219,22 +219,30 @@ int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces, 
 	return true;
 }
 
-void display_board(piece* board[8][8], piece* piece_to_move)
+void display_board(piece* board[8][8], piece* piece_to_move, piece* white_pieces[16], piece* black_pieces[16])
 {
 	printf("\x1b[H\x1b[2J");
 	printf("---/TROY'S CHESS GAME/---\n\n");
-	for (int i = 7; i >= 0; i--)
+	for (int rank = 7; rank >= 0; rank--)
 	{
-		for (int j = 0; j < 8; j++)
+		for (int file = 0; file < 8; file++)
 		{
-			piece* current_piece = board[i][j];
-			if (current_piece != NULL) {
+			int can_move = false;
+			piece* current_piece = board[rank][file];
+
+			if (piece_to_move != NULL)
+				can_move = process_move(piece_to_move, file, rank, white_pieces, black_pieces, board);
+
+			if (current_piece != NULL)
+			{
 				printf("\x1b[22m");
 				if (current_piece->color == WHITE)
 					printf("\x1b[37m");
 				else if (current_piece->color == BLACK)
-					printf("\x1b[31m");
+					printf("\x1b[32m");
 
+				if (can_move)
+					printf("\x1b[31m");
 				if (current_piece->type == PAWN)
 					printf("p");
 				else if (current_piece->type == BISHOP)
@@ -249,19 +257,22 @@ void display_board(piece* board[8][8], piece* piece_to_move)
 					printf("K");
 			}
 			else
-				printf(" ");
+				if (!can_move)
+					printf(" ");
+				else
+					printf("*");
 
-			if (j < 7)
+			if (file < 7)
 			{
 				printf("\x1b[37;2m");
 				printf(", ");
 			}
 			else
-				printf("\x1b[37;2m  %c", (char)i + 49);
+				printf("\x1b[37;2m  %c", (char)rank + 49);
 		}
 
 		printf("\n");
-		if (i == 0)
+		if (rank == 0)
 			printf("\n\x1b[2mA  B  C  D  E  F  G  H\n");
 	}
 }
