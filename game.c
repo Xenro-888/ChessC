@@ -12,6 +12,7 @@ void start_game()
 	piece* board[8][8];
 	piece* white_pieces[16];
 	piece* black_pieces[16];
+	const char* UNSELECT_CHAR = "E";
 	init_board(board, white_pieces, black_pieces);
 
 	int game_over = false;
@@ -21,9 +22,9 @@ void start_game()
 		display_board(board);
 		printf("\n\x1b[37;22m\n");
 
+		select_piece:
 		char player_input[12];
 		piece* piece_to_move = NULL;
-
 		while (piece_to_move == NULL)
 		{
 			printf("ENTER THE PIECE'S POSITION.\n");
@@ -45,14 +46,25 @@ void start_game()
 		while (!valid_move)
 		{
 			printf("ENTER MOVE COORDINATES.\n");
-			fgets(player_input, sizeof(player_input), stdin);
+			scanf("/^[a-h][1-8]/i", player_input);
+
+			player_input[strcspn(player_input, "\n")] = 0;
+			const char* test = player_input;
+
 			move_file = get_file_index(player_input[0]);
 			move_rank = get_rank_index(player_input[1]);
+
+			int comp = strcmp(player_input, UNSELECT_CHAR);
+			if (comp == 0)
+				goto select_piece;
 
 			if (!is_position_in_board(move_file, move_rank))
 				continue;
 
 			valid_move = process_move(piece_to_move, move_file, move_rank, white_pieces, black_pieces, board);
+
+			while (!strchr(player_input, '\n') && fgets(player_input, sizeof(player_input), stdin));
+			memset(player_input, 0, sizeof(player_input));
 		}
 
 		set_piece_pos(piece_to_move, move_file, move_rank, board);
