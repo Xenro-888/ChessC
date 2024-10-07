@@ -218,3 +218,50 @@ int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces, 
 
 	return true;
 }
+
+void display_board(piece* board[8][8], piece* piece_to_move)
+{
+	printf("\x1b[H\x1b[2J");
+	printf("---/TROY'S CHESS GAME/---\n\n");
+	for (int i = 7; i >= 0; i--)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			piece* current_piece = board[i][j];
+			if (current_piece != NULL) {
+				printf("\x1b[22m");
+				if (current_piece->color == WHITE)
+					printf("\x1b[37m");
+				else if (current_piece->color == BLACK)
+					printf("\x1b[31m");
+
+				if (current_piece->type == PAWN)
+					printf("p");
+				else if (current_piece->type == BISHOP)
+					printf("b");
+				else if (current_piece->type == KNIGHT)
+					printf("k");
+				else if (current_piece->type == ROOK)
+					printf("r");
+				else if (current_piece->type == QUEEN)
+					printf("Q");
+				else if (current_piece->type == KING)
+					printf("K");
+			}
+			else
+				printf(" ");
+
+			if (j < 7)
+			{
+				printf("\x1b[37;2m");
+				printf(", ");
+			}
+			else
+				printf("\x1b[37;2m  %c", (char)i + 49);
+		}
+
+		printf("\n");
+		if (i == 0)
+			printf("\n\x1b[2mA  B  C  D  E  F  G  H\n");
+	}
+}
