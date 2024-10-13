@@ -53,6 +53,8 @@ void start_game()
 				continue;
 
 			valid_move = process_move(piece_to_move, move_file, move_rank, white_pieces, black_pieces, board);
+			if (is_path_blocked(board, piece_to_move, -1, 1, 1))
+				printf("BISHOP PATH BLOCKED!\n");
 		}
 
 		set_piece_pos(piece_to_move, move_file, move_rank, board);

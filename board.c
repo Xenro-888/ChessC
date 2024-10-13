@@ -28,7 +28,6 @@ int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment
 {
 	int check_space_file = piece_to_move->file + file_increment;
 	int check_space_rank = piece_to_move->rank + rank_increment;
-
 	piece* check_space = board[check_space_rank][check_space_file];
 
 	for (int i = 0; i < path_length; i++)
@@ -40,7 +39,7 @@ int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment
 		check_space_rank += rank_increment;
 		check_space = board[check_space_rank][check_space_file];
 	}
-
+	
 	return false;
 }
 
@@ -149,8 +148,8 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 	else if (piece_to_move->type == ROOK)
 	{
 		if (
-			(abs_file_difference > 0 && abs_rank_difference) != 0 ||
-			(abs_rank_difference > 0 && abs_file_difference) != 0
+			(abs_file_difference > 0 && abs_rank_difference != 0) ||
+			(abs_rank_difference > 0 && abs_file_difference != 0)
 			)
 		{
 			return false;
@@ -162,7 +161,7 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 				piece_to_move,
 				get_sign(file_difference),
 				get_sign(rank_difference),
-				max(abs_file_difference, abs_rank_difference))
+				max(abs_file_difference, abs_rank_difference) )
 			)
 		{
 			return false;
@@ -207,6 +206,7 @@ int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces[1
 	if (!is_move_valid_basic(piece_to_move, file, rank, board))
 		return false;
 
+	/*
 	board[rank][file] = piece_to_move;
 	board[piece_to_move->rank][piece_to_move->file] = NULL;
 
@@ -215,6 +215,7 @@ int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces[1
 
 	board[piece_to_move->rank][piece_to_move->file] = piece_to_move;
 	board[rank][file] = covered_piece;
+	*/
 
 	return true;
 }
@@ -243,6 +244,7 @@ void display_board(piece* board[8][8], piece* piece_to_move, piece* white_pieces
 
 				if (can_move)
 					printf("\x1b[31m");
+
 				if (current_piece->type == PAWN)
 					printf("p");
 				else if (current_piece->type == BISHOP)
@@ -275,4 +277,5 @@ void display_board(piece* board[8][8], piece* piece_to_move, piece* white_pieces
 		if (rank == 0)
 			printf("\n\x1b[2mA  B  C  D  E  F  G  H\n");
 	}
+	printf("\x1b[22m");
 }
