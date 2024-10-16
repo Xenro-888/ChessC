@@ -6,10 +6,10 @@ int get_sign(int number)
 {
 	if (number > 0)
 		return 1;
-	else if (number == 0)
-		return number;
-	else
+	else if (number < 0)
 		return -1;
+	else
+		return 0;
 }
 
 int set_piece_pos(piece* piece_to_move, int file, int rank, piece* board[8][8])
@@ -32,8 +32,16 @@ int is_path_blocked(piece* board[8][8], piece* piece_to_move, int file_increment
 
 	for (int i = 0; i < path_length; i++)
 	{
-		if (check_space != NULL && check_space->color == piece_to_move->color)
-			return true;
+		if (check_space_file < 0 || check_space_file > 7 || check_space_rank < 0 || check_space_rank > 7)
+			return false;
+
+		if (check_space != NULL)
+		{
+			if (check_space->color == piece_to_move->color)
+				return true;
+			else if (i + 1 < path_length)
+				return true;
+		}
 
 		check_space_file += file_increment;
 		check_space_rank += rank_increment;
@@ -76,6 +84,7 @@ int is_in_check(piece_color color, piece* white_pieces[16], piece* black_pieces[
 	return false;
 }
 
+// checks if a move is move moveset and not blocked
 int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8][8])
 {
 	if (piece_to_move == NULL || !is_position_in_board(file, rank))
@@ -102,17 +111,12 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 	}
 	else if (piece_to_move->type == BISHOP)
 	{
-		if (
-			(file_difference == 0 || rank_difference == 0) ||
-			abs_file_difference / abs_rank_difference != 1
-			)
-		{
-			return false;
-		}
-
 		int check_space_file = piece_to_move->file;
 		int check_space_rank = piece_to_move->rank;
 		piece* check_space = board[check_space_rank][check_space_file];
+
+		if (abs_file_difference != abs_rank_difference)
+			return false;
 
 		if (
 			is_path_blocked(
@@ -136,14 +140,6 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 		{
 			return false;
 		}
-
-		if (space_to_move != NULL)
-		{
-			if (space_to_move->color != piece_to_move->color)
-				space_to_move = NULL;
-			else
-				return false;
-		}
 	}
 	else if (piece_to_move->type == ROOK)
 	{
@@ -161,7 +157,7 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 				piece_to_move,
 				get_sign(file_difference),
 				get_sign(rank_difference),
-				max(abs_file_difference, abs_rank_difference) )
+				max(abs_file_difference, abs_rank_difference))
 			)
 		{
 			return false;
@@ -170,8 +166,9 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 	else if (piece_to_move->type == QUEEN)
 	{
 		if (
-			abs_rank_difference > 0 && abs_file_difference != 0 &&
-			abs_rank_difference != 0 && (abs(file_difference / rank_difference) > 0 && abs(file_difference / rank_difference) < 1 || abs(file_difference / rank_difference) > 1)
+			(abs_file_difference != abs_rank_difference) &&
+			(abs_file_difference > 0 && abs_rank_difference != 0) &&
+			(abs_rank_difference > 0 && abs_file_difference != 0)
 			)
 		{
 			return false;
@@ -197,6 +194,8 @@ int is_move_valid_basic(piece* piece_to_move, int file, int rank, piece* board[8
 
 	if (space_to_move != NULL && space_to_move->color == piece_to_move->color)
 		return false;
+
+	return true;
 }
 
 int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces[16], piece* black_pieces[16], piece* board[8][8])
@@ -205,8 +204,7 @@ int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces[1
 
 	if (!is_move_valid_basic(piece_to_move, file, rank, board))
 		return false;
-
-	/*
+	
 	board[rank][file] = piece_to_move;
 	board[piece_to_move->rank][piece_to_move->file] = NULL;
 
@@ -215,7 +213,6 @@ int process_move(piece* piece_to_move, int file, int rank, piece* white_pieces[1
 
 	board[piece_to_move->rank][piece_to_move->file] = piece_to_move;
 	board[rank][file] = covered_piece;
-	*/
 
 	return true;
 }
