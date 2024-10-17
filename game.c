@@ -15,9 +15,8 @@ void start_game()
 	piece_color curr_turn = WHITE;
 	init_board(board, white_pieces, black_pieces);
 
-	int game_over = false;
-
-	while (!game_over)
+	int game_result = 0;
+	while (game_result == 0)
 	{
 		int is_in_check = false;
 
@@ -108,6 +107,18 @@ void start_game()
 			piece_to_move->type = selected_type;
 		}
 
+		game_result = game_end_state(board, white_pieces, black_pieces);
 		curr_turn = curr_turn == WHITE ? BLACK : WHITE;
 	}
+
+	if (game_result > 0 && game_result < 3)
+	{
+		printf("CHECKMATE!\n");
+		if (game_result == 1)
+			printf("WHITE WINS!\n");
+		else if (game_result == 2)
+			printf("BLACK WINS!\n");
+	}
+	else if (game_result == 3)
+		printf("STALEMATE!\n");
 }

@@ -276,3 +276,52 @@ void display_board(piece* board[8][8], piece* piece_to_move, piece* white_pieces
 	}
 	printf("\x1b[22m");
 }
+
+int game_end_state(piece* board[8][8], piece* white_pieces[16], piece* black_pieces[16])
+{
+	int colors_that_can_move = 0;
+	for (int i = 0; i < 2; i++)
+	{
+		int can_move = false;
+		piece_color curr_color = (piece_color)i;
+		piece** curr_piece_array = curr_color == WHITE ? white_pieces : black_pieces; // if the currrent color is white, use the white piece array. if not, use the black piece array.
+
+		for (int i = 0; i < 16; i++)
+		{
+			piece* curr_piece = curr_piece_array[i];
+			if (curr_piece == NULL)
+				continue;
+
+			printf("FILE: %d, RANK: %d\n", curr_piece->file, curr_piece->rank);
+			for (int rank = 0; rank < 8; rank++)
+			{
+				for (int file = 0; file < 8; file++)
+				{
+					if (process_move(curr_piece, file, rank, white_pieces, black_pieces, board))
+					{
+						colors_that_can_move++;
+						goto done_process_moves;
+					}
+				}
+			}
+		}
+
+	done_process_moves:
+		if (is_in_check(WHITE, white_pieces, black_pieces, board) && !can_move)
+		{
+			piece_color winner = curr_color == WHITE ? BLACK : WHITE;
+			printf("CHECKMATE!\n");
+			if (winner = WHITE)
+				return 1;
+			else
+				return 2;
+		}
+		else if (curr_color == BLACK && colors_that_can_move < 2)
+		{
+			printf("STALEMATE!\n");
+			return 3;
+		}
+	}
+
+	return 0;
+}
